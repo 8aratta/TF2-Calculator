@@ -4,8 +4,12 @@
   "version": "0.0.0",
   "main": "electron/main.cjs",
   "type": "module",
+  "bin": {
+    "tf2calc": "./bin/tf2calc.js"
+  },
   "scripts": {
     "dev": "vite",
+    "cli": "node ./bin/tf2calc.js",
     "electron:dev": "wait-on http://localhost:5173 && electron .",
     "desktop:dev": "concurrently -k \"npm:dev\" \"npm:electron:dev\"",
     "build": "vite build",

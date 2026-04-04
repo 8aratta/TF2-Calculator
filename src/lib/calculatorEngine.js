@@ -1,4 +1,4 @@
-import { METAL_DISPLAY_VALUE, METAL_SCRAP } from '../config/calculatorConfig'
+import { METAL_DISPLAY_VALUE, METAL_SCRAP } from '../config/calculatorConfig.js'
 
 const PRECEDENCE = { '+': 1, '-': 1, '*': 2 }
 
