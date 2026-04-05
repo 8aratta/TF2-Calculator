@@ -1,0 +1,167 @@
+name: Publish npm packages
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-npm-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Validate release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test core package
+        run: npm -w @tf2calc/core run test
+
+      - name: Verify tag matches package versions
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag_version="${GITHUB_REF_NAME#v}"
+
+          core_version=$(node -e "console.log(JSON.parse(require('node:fs').readFileSync('packages/core/package.json','utf8')).version)")
+          cli_version=$(node -e "console.log(JSON.parse(require('node:fs').readFileSync('packages/cli/package.json','utf8')).version)")
+          react_version=$(node -e "console.log(JSON.parse(require('node:fs').readFileSync('packages/react-ui/package.json','utf8')).version)")
+
+          for pkg in "$core_version" "$cli_version" "$react_version"; do
+            if [[ "$pkg" != "$tag_version" ]]; then
+              echo "Tag version v${tag_version} does not match package version ${pkg}."
+              exit 1
+            fi
+          done
+
+      - name: Fail if target versions already exist on npm
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          check_version () {
+            local name="$1"
+            local version="$2"
+
+            if npm view "${name}@${version}" version >/dev/null 2>&1; then
+              echo "${name}@${version} is already published on npm."
+              exit 1
+            fi
+
+            echo "${name}@${version} is available for publish."
+          }
+
+          core_version=$(node -e "console.log(JSON.parse(require('node:fs').readFileSync('packages/core/package.json','utf8')).version)")
+          cli_version=$(node -e "console.log(JSON.parse(require('node:fs').readFileSync('packages/cli/package.json','utf8')).version)")
+          react_version=$(node -e "console.log(JSON.parse(require('node:fs').readFileSync('packages/react-ui/package.json','utf8')).version)")
+
+          check_version "@tf2calc/core" "$core_version"
+          check_version "@tf2calc/cli" "$cli_version"
+          check_version "@tf2calc/react-ui" "$react_version"
+
+  build:
+    name: Build workspaces
+    runs-on: ubuntu-latest
+    needs: validate
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build all workspaces
+        run: npm run build --workspaces --if-present
+
+      - name: Verify expected build artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f packages/cli/dist/tf2calc.js
+          test -f packages/react-ui/dist/index.js
+
+  publish:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    needs: build
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node and npm auth
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Ensure NPM_TOKEN is configured
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "${NODE_AUTH_TOKEN:-}" ]]; then
+            echo "Repository secret NPM_TOKEN is required."
+            exit 1
+          fi
+
+      - name: Build all workspaces
+        run: npm run build --workspaces --if-present
+
+      - name: Publish @tf2calc/core
+        run: npm -w @tf2calc/core publish --access public
+
+      - name: Wait for npm propagation
+        shell: bash
+        run: |
+          set -euo pipefail
+          core_version=$(node -e "console.log(JSON.parse(require('node:fs').readFileSync('packages/core/package.json','utf8')).version)")
+
+          for attempt in {1..12}; do
+            if npm view "@tf2calc/core@${core_version}" version >/dev/null 2>&1; then
+              echo "@tf2calc/core@${core_version} is visible on npm."
+              exit 0
+            fi
+
+            echo "Waiting for npm propagation (attempt ${attempt}/12)..."
+            sleep 10
+          done
+
+          echo "@tf2calc/core@${core_version} was not visible on npm in time."
+          exit 1
+
+      - name: Publish @tf2calc/cli
+        run: npm -w @tf2calc/cli publish --access public
+
+      - name: Publish @tf2calc/react-ui
+        run: npm -w @tf2calc/react-ui publish --access public

@@ -1,26 +1,29 @@
 # TF2 Calculator
 
-TF2 Calculator is a monorepo that provides:
+TF2 Calculator is a big ol' monorepo that provides:
 
 - A shared TF2 metal math engine: `@tf2calc/core`
-- A CLI tool: `@tf2calc/cli`
 - A reusable React component: `@tf2calc/react-ui`
 - A desktop app (Electron + React) under `apps/desktop`
+- A CLI tool: `@tf2calc/cli` (BECAUSE I F'ING CAN, felt cute might delete later...)
 
 It evaluates expressions using TF2-valid increments and integer scrap arithmetic, then formats output back to ref values.
+Basically.. its a calculator... for TF2... because i was sick and tired of calculating the sum value of like  32+ items a rando offers me for my low tier unusual on a random ass server.
+
+I COULDNT FIND ONE GOOD CALCULATOR.... LIKE THE GAME IS LIKE 20 YEARS OLD.. ok crashout is over lets continue:
 
 ## Core Rules
 
 - Internal math is done in scrap units (`Scrap=1`, `Reclaimed=3`, `Refined=9`)
-- Division is unsupported
-- Valid ref decimal increments are `.00`, `.11`, `.22`, `.33`, `.44`, `.55`, `.66`, `.77`, `.88`
-- Formatting uses the shared engine so desktop app, CLI, and React UI stay consistent
+- Division is unsupported ... I tried and failed miserably (maybe i'll try again later)
+- Valid ref decimal increments are `.00`, `.11`, `.22`, `.33`, `.44`, `.55`, `.66`, `.77`, `.88` (because .99 is a ref, duh')
+- Formatting uses the shared calc engine so desktop app, React UI and CLI try to stay consistent... so far it has worked... 
 
 ## Packages
 
-- `@tf2calc/core` - Shared parser/evaluator/formatter engine
+- `@tf2calc/core` - Shared parser/evaluator/formatter engine aka the lib you want if you need a calculator
 - `@tf2calc/cli` - Command-line tool (`tf2calc`)
-- `@tf2calc/react-ui` - Embeddable React calculator component
+- `@tf2calc/react-ui` - Embeddable React calculator component (also the base for the desktop app soo yeah)
 
 ## Quick Start
 
@@ -111,6 +114,21 @@ npm run release:cli
 npm run release:react-ui
 npm run release
 ```
+
+### GitHub Actions Release Automation
+
+Automated release workflows are available under `.github/workflows`:
+
+- `publish-npm-packages.yml`
+	- Triggers: manual dispatch and `v*` tag push
+	- Validates lint + core tests + build
+	- Fails early if target package version already exists on npm
+	- Publishes in order: `@tf2calc/core` -> `@tf2calc/cli` -> `@tf2calc/react-ui`
+- `release-desktop-installer.yml`
+	- Triggers: manual dispatch (requires `release_tag`) and `v*` tag push
+	- Builds desktop installer and uploads `.exe` artifacts to GitHub Releases
+
+    Two ways baby!
 
 ## Documentation
 
