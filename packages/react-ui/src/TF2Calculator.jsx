@@ -1,21 +1,22 @@
-import './App.css'
+import './base.css'
+import './styles.css'
 import scrapIcon from './assets/Scrap_Metal.png'
 import reclaimedIcon from './assets/Reclaimed_Metal.png'
 import refinedIcon from './assets/Refined_Metal.png'
-import { CalculatorButtonGrid } from './components/CalculatorButtonGrid'
-import { CalculatorDisplay } from './components/CalculatorDisplay'
-import { CalculatorFooter } from './components/CalculatorFooter'
-import { HistoryPanel } from './components/HistoryPanel'
-import { SettingsControls } from './components/SettingsControls'
-import { useCalculator } from './hooks/useCalculator'
+import { CalculatorButtonGrid } from './components/CalculatorButtonGrid.jsx'
+import { CalculatorDisplay } from './components/CalculatorDisplay.jsx'
+import { CalculatorFooter } from './components/CalculatorFooter.jsx'
+import { HistoryPanel } from './components/HistoryPanel.jsx'
+import { SettingsControls } from './components/SettingsControls.jsx'
+import { useCalculator } from './hooks/useCalculator.js'
 
-const metalIcons = {
+const defaultMetalIcons = {
   Scrap: scrapIcon,
   Reclaimed: reclaimedIcon,
   Refined: refinedIcon,
 }
 
-function App() {
+export function TF2Calculator({ metalIcons = defaultMetalIcons }) {
   const {
     actions,
     breakdown,
@@ -73,4 +74,4 @@ function App() {
   )
 }
 
-export default App
+export default TF2Calculator

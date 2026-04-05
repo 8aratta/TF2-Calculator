@@ -1,0 +1,30 @@
+{
+  "name": "@tf2calc/core",
+  "version": "0.1.0",
+  "description": "TF2 metal calculator engine (tokenizer, parser, evaluator, formatting)",
+  "type": "module",
+  "files": [
+    "src"
+  ],
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "license": "MIT",
+  "author": "8aratta",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "tf2",
+    "team-fortress-2",
+    "metal",
+    "calculator",
+    "scrap",
+    "refined"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/8aratta/TF2-Calculator.git"
+  },
+  "homepage": "https://github.com/8aratta/TF2-Calculator#readme"
+}

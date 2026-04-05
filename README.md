@@ -1,6 +1,12 @@
 # TF2 Calculator
 
-TF2 Calculator is a desktop calculator (Electron + React) and CLI tool for Team Fortress 2 metal math.
+TF2 Calculator is a monorepo that provides:
+
+- A shared TF2 metal math engine: `@tf2calc/core`
+- A CLI tool: `@tf2calc/cli`
+- A reusable React component: `@tf2calc/react-ui`
+- A desktop app (Electron + React) under `apps/desktop`
+
 It evaluates expressions using TF2-valid increments and integer scrap arithmetic, then formats output back to ref values.
 
 ## Core Rules
@@ -8,37 +14,50 @@ It evaluates expressions using TF2-valid increments and integer scrap arithmetic
 - Internal math is done in scrap units (`Scrap=1`, `Reclaimed=3`, `Refined=9`)
 - Division is unsupported
 - Valid ref decimal increments are `.00`, `.11`, `.22`, `.33`, `.44`, `.55`, `.66`, `.77`, `.88`
-- Formatting uses the shared engine so desktop and CLI outputs stay consistent
+- Formatting uses the shared engine so desktop app, CLI, and React UI stay consistent
 
-## Desktop App
+## Packages
+
+- `@tf2calc/core` - Shared parser/evaluator/formatter engine
+- `@tf2calc/cli` - Command-line tool (`tf2calc`)
+- `@tf2calc/react-ui` - Embeddable React calculator component
+
+## Quick Start
+
+Install workspace dependencies:
 
 ```bash
 npm install
+```
+
+Run desktop app in development:
+
+```bash
 npm run desktop:dev
 ```
 
-## CLI
-
-Run locally:
+Run CLI locally:
 
 ```bash
 npm run cli -- "1.33 ref + 2 rec"
 ```
 
-Use through npm bin:
+Run CLI via npm exec:
 
 ```bash
 npm exec tf2calc -- "1.33 ref + 2 rec"
 ```
 
-Global install (after publish):
+## CLI Usage
+
+Install globally (published package):
 
 ```bash
-npm i -g tf2-calculator
+npm i -g @tf2calc/cli
 tf2calc "1.33 ref + 2 rec"
 ```
 
-### Commands
+Commands:
 
 ```bash
 tf2calc "<expression>"
@@ -53,19 +72,16 @@ tf2calc profit buy=<value> sell=<value>
 tf2calc split <value> <integer>
 ```
 
-Global flag:
+Global flags:
 
-```bash
---quiet
-```
+- `--quiet` (print only final ref value)
+- `--help` (print usage)
 
-`--quiet` prints only the final ref value.
+Value input:
 
-### Value Input
-
-- Accepts aliases: `ref`, `rec`, `scrap`
-- Accepts canonical names: `Refined`, `Reclaimed`, `Scrap`
-- Accepts compact and spaced expressions
+- Aliases: `ref`, `rec`, `scrap`
+- Canonical names: `Refined`, `Reclaimed`, `Scrap`
+- Both compact and spaced expressions are supported
 
 Examples:
 
@@ -78,7 +94,29 @@ tf2calc profit buy="1 ref" sell="1.33 ref"
 
 ## Development
 
+Common scripts:
+
 ```bash
 npm run lint
 npm run build
+npm run build:desktop
+npm run build:react-ui
 ```
+
+Publish scripts:
+
+```bash
+npm run release:core
+npm run release:cli
+npm run release:react-ui
+npm run release
+```
+
+## Documentation
+
+- [docs/calculation-math.md](docs/calculation-math.md)
+- [docs/cli-technical.md](docs/cli-technical.md)
+- [docs/core-package.md](docs/core-package.md)
+- [docs/cli-package.md](docs/cli-package.md)
+- [docs/react-ui-package.md](docs/react-ui-package.md)
+- [docs/desktop-app.md](docs/desktop-app.md)

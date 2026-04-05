@@ -1,4 +1,4 @@
-import { METAL_DISPLAY_VALUE, METAL_SCRAP } from '../config/calculatorConfig.js'
+import { METAL_DISPLAY_VALUE, METAL_SCRAP } from './calculatorConfig.js'
 
 const PRECEDENCE = { '+': 1, '-': 1, '*': 2 }
 
@@ -214,7 +214,6 @@ const evaluateRpnToScrap = (rpn) => {
       }
 
       stack.push({ kind: 'number', value: left.value * right.value })
-      continue
     }
   }
 

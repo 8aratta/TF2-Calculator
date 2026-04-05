@@ -1,52 +1,31 @@
 {
-  "name": "tf2-calculator",
+  "name": "tf2-calculator-workspace",
   "private": true,
-  "version": "0.0.0",
-  "main": "electron/main.cjs",
+  "version": "0.1.0",
   "type": "module",
-  "bin": {
-    "tf2calc": "./bin/tf2calc.js"
-  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
   "scripts": {
-    "dev": "vite",
-    "cli": "node ./bin/tf2calc.js",
-    "electron:dev": "wait-on http://localhost:5173 && electron .",
-    "desktop:dev": "concurrently -k \"npm:dev\" \"npm:electron:dev\"",
-    "build": "vite build",
-    "desktop:build": "npm run build && electron-builder",
+    "build": "npm run build --workspaces --if-present",
+    "build:desktop": "npm -w @tf2calc/desktop run build",
+    "build:react-ui": "npm -w @tf2calc/react-ui run build",
+    "cli": "npm -w @tf2calc/cli run cli --",
+    "desktop:dev": "npm -w @tf2calc/desktop run dev",
+    "desktop:package": "npm -w @tf2calc/desktop run package",
     "lint": "eslint .",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4"
+    "preview:desktop": "npm -w @tf2calc/desktop run preview",
+    "release:core": "npm -w @tf2calc/core publish --access public",
+    "release:cli": "npm -w @tf2calc/cli publish --access public",
+    "release:react-ui": "npm -w @tf2calc/react-ui publish --access public",
+    "release": "npm run release:core && npm run release:cli && npm run release:react-ui"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.1",
-    "concurrently": "^9.2.1",
-    "electron": "^41.1.1",
     "eslint": "^9.39.4",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.2",
-    "globals": "^17.4.0",
-    "vite": "^8.0.1",
-    "wait-on": "^9.0.4"
-  },
-  "build": {
-    "appId": "com.tf2.calculator",
-    "productName": "TF2 Calculator",
-    "files": [
-      "dist/**/*",
-      "electron/**/*"
-    ],
-    "directories": {
-      "buildResources": "build"
-    },
-    "win": {
-      "target": "nsis"
-    }
+    "globals": "^17.4.0"
   }
 }

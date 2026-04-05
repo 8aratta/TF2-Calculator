@@ -10,7 +10,7 @@ import {
   isOperator,
   isValueToken,
   toMetalBreakdown,
-} from '../lib/calculatorEngine'
+} from '@tf2calc/core'
 
 export function useCalculator() {
   const [expressionTokens, setExpressionTokens] = useState([])
@@ -20,15 +20,8 @@ export function useCalculator() {
   const [darkMode, setDarkMode] = useState(false)
   const [materialValueView, setMaterialValueView] = useState('ref-value')
 
-  const resultText = useMemo(
-    () => formatRefFromScrap(resultScrap),
-    [resultScrap],
-  )
-
-  const breakdown = useMemo(
-    () => toMetalBreakdown(resultScrap),
-    [resultScrap],
-  )
+  const resultText = useMemo(() => formatRefFromScrap(resultScrap), [resultScrap])
+  const breakdown = useMemo(() => toMetalBreakdown(resultScrap), [resultScrap])
 
   const pushDigit = useCallback((digit) => {
     setExpressionTokens((prev) => {

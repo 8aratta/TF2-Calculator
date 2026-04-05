@@ -1,0 +1,41 @@
+{
+  "name": "@tf2calc/cli",
+  "version": "0.1.0",
+  "description": "CLI for TF2 metal calculations",
+  "type": "module",
+  "bin": {
+    "tf2calc": "./dist/tf2calc.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "node ./build.js",
+    "precli": "npm run build",
+    "cli": "node ./dist/tf2calc.js",
+    "cli:dev": "node ./bin/tf2calc.js",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "@tf2calc/core": "0.1.0"
+  },
+  "license": "MIT",
+  "author": "8aratta",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "tf2",
+    "team-fortress-2",
+    "metal",
+    "calculator",
+    "cli",
+    "steam"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/8aratta/TF2-Calculator.git"
+  },
+  "homepage": "https://github.com/8aratta/TF2-Calculator#readme"
+}

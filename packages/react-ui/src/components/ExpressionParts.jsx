@@ -1,4 +1,4 @@
-import { getExpressionDisplayParts } from '../lib/calculatorEngine'
+import { getExpressionDisplayParts } from '@tf2calc/core'
 
 export function ExpressionParts({
   expressionTokens,
@@ -15,19 +15,20 @@ export function ExpressionParts({
         emptyText
       ) : (
         <span className="expression-parts">
-          {parts.map((part) =>
-            part.type === 'metal' ? (
+          {parts.map((part) => {
+            const icon = metalIcons[part.value]
+            return part.type === 'metal' && icon ? (
               <span key={part.id} className="expression-metal-chip" aria-label={part.value}>
                 <img
-                  src={metalIcons[part.value]}
+                  src={icon}
                   alt={part.value}
                   className="expression-metal-icon"
                 />
               </span>
             ) : (
               <span key={part.id}>{part.value}</span>
-            ),
-          )}
+            )
+          })}
         </span>
       )}
     </p>

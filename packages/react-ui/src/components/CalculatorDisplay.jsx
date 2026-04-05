@@ -1,4 +1,4 @@
-import { ExpressionParts } from './ExpressionParts'
+import { ExpressionParts } from './ExpressionParts.jsx'
 
 export function CalculatorDisplay({
   error,

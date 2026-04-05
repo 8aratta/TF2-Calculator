@@ -1,4 +1,4 @@
-import { BUTTON_ROWS } from '../config/calculatorConfig'
+import { BUTTON_ROWS } from '../config/uiConfig.js'
 
 export function CalculatorButtonGrid({ actions, expressionTokens, metalIcons }) {
   return (
@@ -24,6 +24,8 @@ export function CalculatorButtonGrid({ actions, expressionTokens, metalIcons }) 
           else if (button.label === 'C') actions.clearAll()
         }
 
+        const icon = metalIcons[button.label]
+
         return (
           <button
             key={`${button.type}-${button.label}`}
@@ -33,9 +35,9 @@ export function CalculatorButtonGrid({ actions, expressionTokens, metalIcons }) 
             aria-label={button.type === 'metal' ? `${button.label} metal` : button.label}
             title={button.type === 'metal' ? button.label : undefined}
           >
-            {button.type === 'metal' ? (
+            {button.type === 'metal' && icon ? (
               <img
-                src={metalIcons[button.label]}
+                src={icon}
                 alt={`${button.label} metal`}
                 className="metal-icon"
               />

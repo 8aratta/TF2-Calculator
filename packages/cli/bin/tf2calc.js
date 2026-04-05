@@ -3,10 +3,10 @@
 
 import {
   evaluateTokens,
+  expressionToDisplay,
   formatRefFromScrap,
   toMetalBreakdown,
-  expressionToDisplay,
-} from '../src/lib/calculatorEngine.js'
+} from '@tf2calc/core'
 
 const HELP_TEXT = `Usage:
   tf2calc "<expression>"
@@ -46,6 +46,7 @@ const ALIAS_TO_METAL = {
 }
 
 const NUMBER_RE = /^\d+(?:\.\d+)?$/
+const METAL_VALUES = new Set(Object.values(ALIAS_TO_METAL))
 
 const fail = (message) => {
   console.error(`Error: ${message}`)
@@ -118,7 +119,7 @@ const tokenizeExpression = (input) => {
     const current = normalized[index]
     const next = normalized[index + 1]
 
-    if (NUMBER_RE.test(current) && next && Object.values(ALIAS_TO_METAL).includes(next)) {
+    if (NUMBER_RE.test(current) && next && METAL_VALUES.has(next)) {
       if (next === 'Refined') {
         withUnitExpansion.push(current)
       } else {
@@ -243,13 +244,7 @@ const handlers = {
     const expression = args.join(' ')
     const { scrap } = evaluateExpression(expression)
 
-    printResult({
-      quiet,
-      scrap,
-      lines: [
-        formatRefFromScrap(scrap),
-      ],
-    })
+    printResult({ quiet, scrap, lines: [formatRefFromScrap(scrap)] })
   },
 
   convert: ({ args, quiet }) => {
@@ -279,14 +274,8 @@ const handlers = {
 
   normalize: ({ args, quiet }) => {
     ensureArgs(args, 1, 'tf2calc normalize <value>')
-    const value = args.join(' ')
-    const { scrap } = evaluateExpression(value)
-
-    printResult({
-      quiet,
-      scrap,
-      lines: [formatRefFromScrap(scrap)],
-    })
+    const { scrap } = evaluateExpression(args.join(' '))
+    printResult({ quiet, scrap, lines: [formatRefFromScrap(scrap)] })
   },
 
   sum: ({ args, quiet }) => {
@@ -294,30 +283,17 @@ const handlers = {
 
     let total = 0
     for (const arg of args) {
-      const { scrap } = evaluateExpression(arg)
-      total += scrap
+      total += evaluateExpression(arg).scrap
     }
 
-    printResult({
-      quiet,
-      scrap: total,
-      lines: [formatRefFromScrap(total)],
-    })
+    printResult({ quiet, scrap: total, lines: [formatRefFromScrap(total)] })
   },
 
   mul: ({ args, quiet }) => {
     ensureArgs(args, 2, 'tf2calc mul <value> <integer>')
-
     const multiplier = parseStrictInteger(args.at(-1), 'Multiplier')
-    const valueExpression = args.slice(0, -1).join(' ')
-    const { scrap } = evaluateExpression(valueExpression)
-    const result = scrap * multiplier
-
-    printResult({
-      quiet,
-      scrap: result,
-      lines: [formatRefFromScrap(result)],
-    })
+    const result = evaluateExpression(args.slice(0, -1).join(' ')).scrap * multiplier
+    printResult({ quiet, scrap: result, lines: [formatRefFromScrap(result)] })
   },
 
   avg: ({ args, quiet }) => {
@@ -325,23 +301,16 @@ const handlers = {
 
     let total = 0
     for (const arg of args) {
-      const { scrap } = evaluateExpression(arg)
-      total += scrap
+      total += evaluateExpression(arg).scrap
     }
 
     const average = Math.round(total / args.length)
-
-    printResult({
-      quiet,
-      scrap: average,
-      lines: [formatRefFromScrap(average)],
-    })
+    printResult({ quiet, scrap: average, lines: [formatRefFromScrap(average)] })
   },
 
   explain: ({ args, quiet }) => {
     ensureArgs(args, 1, 'tf2calc explain "<expression>"')
-    const expression = args.join(' ')
-    const { tokens, scrap } = evaluateExpression(expression)
+    const { tokens, scrap } = evaluateExpression(args.join(' '))
 
     if (quiet) {
       console.log(formatRefFromScrap(scrap))
@@ -361,10 +330,7 @@ const handlers = {
 
   compare: ({ args, quiet }) => {
     ensureArgs(args, 2, 'tf2calc compare <a> <b>')
-
-    const left = evaluateExpression(args[0]).scrap
-    const right = evaluateExpression(args[1]).scrap
-    const diff = left - right
+    const diff = evaluateExpression(args[0]).scrap - evaluateExpression(args[1]).scrap
 
     if (quiet) {
       console.log(formatRefFromScrap(diff))
@@ -402,9 +368,7 @@ const handlers = {
       throw new Error('Profit requires both buy=<value> and sell=<value>.')
     }
 
-    const buyScrap = evaluateExpression(buy).scrap
-    const sellScrap = evaluateExpression(sell).scrap
-    const diff = sellScrap - buyScrap
+    const diff = evaluateExpression(sell).scrap - evaluateExpression(buy).scrap
 
     if (quiet) {
       console.log(formatRefFromScrap(diff))
@@ -417,14 +381,12 @@ const handlers = {
 
   split: ({ args, quiet }) => {
     ensureArgs(args, 2, 'tf2calc split <value> <integer>')
-
     const shares = parseStrictInteger(args.at(-1), 'Share count')
     if (shares === 0) {
       throw new Error('Share count must not be zero.')
     }
 
-    const valueExpression = args.slice(0, -1).join(' ')
-    const total = evaluateExpression(valueExpression).scrap
+    const total = evaluateExpression(args.slice(0, -1).join(' ')).scrap
     const each = Math.trunc(total / shares)
     const remainder = total - each * shares
 
@@ -448,7 +410,6 @@ const main = () => {
     }
 
     const [first, ...rest] = remaining
-
     if (COMMANDS.has(first)) {
       handlers[first]({ args: rest, quiet })
       return
