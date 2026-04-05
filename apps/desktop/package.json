@@ -1,6 +1,8 @@
 {
   "name": "@tf2calc/desktop",
   "version": "0.1.0",
+  "description": "Desktop TF2 metal calculator built with Electron and React",
+  "author": "8aratta",
   "private": true,
   "type": "module",
   "main": "./electron/main.cjs",
@@ -20,7 +22,7 @@
   "devDependencies": {
     "@vitejs/plugin-react": "^6.0.1",
     "concurrently": "^9.2.1",
-    "electron": "^41.1.1",
+    "electron": "41.1.1",
     "electron-builder": "^26.0.12",
     "vite": "^8.0.1",
     "wait-on": "^9.0.4"
@@ -36,7 +38,8 @@
       "buildResources": "build"
     },
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "signAndEditExecutable": false
     }
   }
 }
