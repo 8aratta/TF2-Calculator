@@ -28,10 +28,6 @@ export const getExpressionDisplayParts = (
   materialValueView = 'ref-value',
 ) =>
   tokens.flatMap((token, index) => {
-    if (materialValueView === 'visual' && (isOpenParen(token) || isCloseParen(token))) {
-      return []
-    }
-
     if (isMetalToken(token) && materialValueView === 'visual') {
       return {
         id: `${token}-${index}`,
