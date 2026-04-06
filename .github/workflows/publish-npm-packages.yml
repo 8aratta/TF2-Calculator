@@ -54,7 +54,7 @@ jobs:
             fi
           done
 
-      - name: Fail if target versions already exist on npm
+      - name: Report publish availability on npm
         shell: bash
         run: |
           set -euo pipefail
@@ -64,8 +64,8 @@ jobs:
             local version="$2"
 
             if npm view "${name}@${version}" version >/dev/null 2>&1; then
-              echo "${name}@${version} is already published on npm."
-              exit 1
+              echo "${name}@${version} is already published on npm and will be skipped."
+              return
             fi
 
             echo "${name}@${version} is available for publish."
@@ -138,10 +138,59 @@ jobs:
       - name: Build all workspaces
         run: npm run build --workspaces --if-present
 
+      - name: Determine publish targets
+        id: publish_targets
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          is_available () {
+            local name="$1"
+            local version="$2"
+
+            if npm view "${name}@${version}" version >/dev/null 2>&1; then
+              echo "false"
+            else
+              echo "true"
+            fi
+          }
+
+          core_version=$(node -e "console.log(JSON.parse(require('node:fs').readFileSync('packages/core/package.json','utf8')).version)")
+          cli_version=$(node -e "console.log(JSON.parse(require('node:fs').readFileSync('packages/cli/package.json','utf8')).version)")
+          react_version=$(node -e "console.log(JSON.parse(require('node:fs').readFileSync('packages/react-ui/package.json','utf8')).version)")
+
+          publish_core=$(is_available "@tf2calc/core" "$core_version")
+          publish_cli=$(is_available "@tf2calc/cli" "$cli_version")
+          publish_react=$(is_available "@tf2calc/react-ui" "$react_version")
+
+          echo "publish_core=${publish_core}" >> "$GITHUB_OUTPUT"
+          echo "publish_cli=${publish_cli}" >> "$GITHUB_OUTPUT"
+          echo "publish_react=${publish_react}" >> "$GITHUB_OUTPUT"
+
+          if [[ "$publish_core" == "true" ]]; then
+            echo "@tf2calc/core@${core_version} will be published."
+          else
+            echo "@tf2calc/core@${core_version} already exists. Skipping publish."
+          fi
+
+          if [[ "$publish_cli" == "true" ]]; then
+            echo "@tf2calc/cli@${cli_version} will be published."
+          else
+            echo "@tf2calc/cli@${cli_version} already exists. Skipping publish."
+          fi
+
+          if [[ "$publish_react" == "true" ]]; then
+            echo "@tf2calc/react-ui@${react_version} will be published."
+          else
+            echo "@tf2calc/react-ui@${react_version} already exists. Skipping publish."
+          fi
+
       - name: Publish @tf2calc/core
+        if: steps.publish_targets.outputs.publish_core == 'true'
         run: npm -w @tf2calc/core publish --access public
 
       - name: Wait for npm propagation
+        if: steps.publish_targets.outputs.publish_core == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -161,7 +210,9 @@ jobs:
           exit 1
 
       - name: Publish @tf2calc/cli
+        if: steps.publish_targets.outputs.publish_cli == 'true'
         run: npm -w @tf2calc/cli publish --access public
 
       - name: Publish @tf2calc/react-ui
+        if: steps.publish_targets.outputs.publish_react == 'true'
         run: npm -w @tf2calc/react-ui publish --access public
