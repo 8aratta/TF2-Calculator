@@ -3,12 +3,17 @@
   "version": "0.1.0",
   "description": "Reusable React UI for TF2 metal calculations",
   "type": "module",
+  "types": "./index.d.ts",
   "exports": {
-    ".": "./dist/index.js",
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./dist/index.js"
+    },
     "./styles.css": "./src/styles.css"
   },
   "files": [
     "dist",
+    "index.d.ts",
     "src/styles.css",
     "src/base.css",
     "src/assets"
